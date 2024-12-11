@@ -1,5 +1,5 @@
 # GCP Secret Manager CLI 
-### gcp-secret-manager-cli (0.0.0)
+### gcp-secret-manager-cli (0.0.1)
 A command-line interface tool for managing secrets in Google Cloud Platform's Secret Manager service with support for bulk operations using environment files.
 
 # Features
@@ -10,6 +10,7 @@ A command-line interface tool for managing secrets in Google Cloud Platform's Se
 
 2. Secret Operations
    - Add/update secrets individually
+   - Retrieve a single secret value
    - Bulk import from environment files
    - Support for environment prefixes
    
@@ -65,6 +66,7 @@ Place the following variables in the .env file to reduce the number of commands 
 | add          | Add secrets from file or command line |
 | remove (rm)  | Remove secrets by prefix or key |
 | list (ls)    | List all secrets |
+| get          | Get single secret |
 
 ### Usage Examples
 
@@ -104,6 +106,11 @@ $ sm list -p DEV_                       # List secrets with prefix
 $ sm ls -p TEST_                        # List secrets with prefix (alias)
 ```
 
+#### Retrieving Secret Value
+```bash
+$ sm get DB_URL                         # Get single secret value
+```
+
 ## Command Options
 ### Global Options
 - `-P, --project-id`: Override GCP project ID
@@ -123,14 +130,17 @@ $ sm ls -p TEST_                        # List secrets with prefix (alias)
 ### List Command
 - `-p, --prefix`: Filter secrets by prefix
 
+### Get Command
+- `KEY`: Retrieve single secret value
+
 # Development
 ### Setup
 ```bash
-git clone https://github.com/yourusername/gcp-secret-manager-cli.git
+git clone https://github.com/TaiwanBigdata/gcp-secret-manager-cli.git
 cd gcp-secret-manager-cli
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-pip install -e ".[dev]"
+python -m venv env
+source env/bin/activate  # Linux/Mac
+pip install -e .
 ```
 
 # Dependencies

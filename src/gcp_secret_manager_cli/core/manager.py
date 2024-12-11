@@ -102,13 +102,14 @@ class SecretManager:
             Dict[str, str]: Operation result
         """
         try:
+            key = key.lower()
             # Try to create secret
             try:
                 secret = self.client.create_secret(key)
                 secret_path = secret.name
                 status = "✅ Created"
             except exceptions.AlreadyExists:
-                secret_path = f"{self.client.project_path}/secrets/{key.lower()}"
+                secret_path = f"{self.client.project_path}/secrets/{key}"
                 status = "🔄 Updated"
 
             # Add version
@@ -129,7 +130,8 @@ class SecretManager:
             Dict[str, str]: Operation result
         """
         try:
-            secret_path = f"{self.client.project_path}/secrets/{key.lower()}"
+            key = key.lower()
+            secret_path = f"{self.client.project_path}/secrets/{key}"
             self.client.delete_secret(secret_path)
             return {"name": key, "status": "✅ Deleted"}
         except Exception as e:
@@ -156,25 +158,48 @@ class SecretManager:
 
         return secrets, count
 
-    # manager.py 中加入這個方法
     def get_secret(self, secret_id: str) -> Optional[secretmanager.Secret]:
         """
-        取得單一 secret 資訊
+        Get a single secret information
 
         Args:
-            secret_id (str): Secret 識別碼
+            secret_id (str): Secret identifier
 
         Returns:
-            Optional[secretmanager.Secret]: Secret 物件，如果不存在則回傳 None
+            Optional[secretmanager.Secret]: Secret object, returns None if not found
         """
         try:
-            # 先用 list_secrets 過濾出符合的 secret
+            # Filter secrets using list_secrets first
             secrets = list(self.client.list_secrets())
-            # 找出完全符合名稱的 secret
+            # Find the secret that exactly matches the name
             matching_secret = next(
                 (s for s in secrets if s.name.split("/")[-1] == secret_id.lower()), None
             )
             return matching_secret
+        except Exception:
+            return None
+
+    def get_secret_value(self, secret_id: str) -> Optional[str]:
+        """
+        Get the value of a secret
+
+        Args:
+            secret_id (str): Secret identifier (case insensitive)
+
+        Returns:
+            Optional[str]: Secret value, returns None if not found
+        """
+        try:
+            # Convert to lowercase for processing
+            secret_id = secret_id.lower()
+            secret = self.get_secret(secret_id)
+            if not secret:
+                return None
+
+            version = self.client.get_secret_version(
+                name=f"{secret.name}/versions/latest"
+            )
+            return version.payload.data.decode("utf-8")
         except Exception:
             return None
 

@@ -1,6 +1,7 @@
 import click
 from click import Context
 from typing import Optional
+from google.api_core import exceptions
 from .core.client import SecretManagerClient
 from .core.manager import SecretManager
 from .utils import console, env
@@ -36,6 +37,10 @@ class CustomGroup(click.Group):
             ("$ sm list", "List all secrets"),
             ("$ sm list -p DEV_", "List secrets with prefix"),
             ("$ sm ls -p TEST_", "List secrets with prefix (alias)"),
+            ("$ sm rm -f -p TEST_", "Force remove by prefix without confirmation"),
+            ("", ""),
+            ("# Get single secret", ""),
+            ("$ sm get DB_URL", "Get value of specific secret"),
         ]
 
         # Show project info
@@ -66,6 +71,7 @@ class CustomGroup(click.Group):
         command_table.add_row("add", "Add secrets from file or command line")
         command_table.add_row("remove (rm)", "Remove secrets by prefix or key")
         command_table.add_row("list (ls)", "List all secrets")
+        command_table.add_row("get", "Get the value of a specific secret")
 
         console.console.print("[bold]Available Commands:[/bold]")
         console.console.print(command_table)
@@ -414,6 +420,44 @@ def list(manager: SecretManager, prefix: Optional[str]):
         timezone = env.get_timezone()
         console.show_secrets_table(secrets, timezone)
         console.console.print(f"\nTotal secrets: {count}")
+
+
+@cli.command()
+@click.argument("key")
+@click.option("-P", "--project-id", help="Override PROJECT_ID")
+def get(key: str, project_id: Optional[str] = None):
+    """Get the value of a specific secret"""
+    try:
+        # Get project_id
+        project_id = project_id or env.get_project_id()
+        if not project_id:
+            console.print_error("PROJECT_ID is required")
+            return
+
+        # Create client and manager
+        client = SecretManagerClient(project_id)
+        manager = SecretManager(client)
+
+        # Get secret value
+        with console.create_spinner_progress() as progress:
+            task = progress.add_task("[blue]Getting secret value...", total=None)
+            result = manager.get_secret_value(key)
+            progress.update(task, completed=True)
+
+        if result:
+            # Display result in table format
+            table = console.Table(show_header=True)
+            table.add_column("Key", style="cyan")
+            table.add_column("Value", style="green")
+            table.add_row(key, result)
+            console.console.print(table)
+        else:
+            console.print_error(f"Secret not found: {key}")
+
+    except exceptions.PermissionDenied:
+        console.print_error("Permission denied to access this secret")
+    except Exception as e:
+        console.print_error(f"Error occurred: {str(e)}")
 
 
 # Add command aliases

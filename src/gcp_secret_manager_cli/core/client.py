@@ -57,6 +57,24 @@ class SecretManagerClient:
             }
         )
 
+    def get_secret_version(
+        self, name: str
+    ) -> secretmanager.AccessSecretVersionResponse:
+        """
+        Access a specific secret version
+
+        Args:
+            name (str): Full path of the secret version
+
+        Returns:
+            secretmanager.AccessSecretVersionResponse: Response containing the secret version
+
+        Raises:
+            exceptions.NotFound: Secret not found
+            exceptions.PermissionDenied: Permission denied
+        """
+        return self.client.access_secret_version(request={"name": name})
+
     def list_secrets(self, prefix: str = None):
         """
         List all secrets
