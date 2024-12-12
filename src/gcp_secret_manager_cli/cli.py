@@ -12,7 +12,9 @@ class CustomGroup(click.Group):
 
     def format_help(self, ctx, formatter):
         """Display custom help format"""
-        console.console.print(f"\n🔐 [bold cyan]Secret Manager CLI Tool[/bold cyan]")
+        console.console.print(
+            f"\n🔐 [bold cyan]Secret Manager CLI Tool[/bold cyan]"
+        )
         # Command examples with their descriptions
         EXAMPLES = [
             ("# If the .env file does not have PROJECT_ID configured.", ""),
@@ -21,7 +23,10 @@ class CustomGroup(click.Group):
             ("# Add secrets from file", ""),
             ("$ sm add -e", "Add from default .env file"),
             ("$ sm add -e .env.dev", "Add from specific env file"),
-            ("$ sm add -e .env.dev -p DEV_", "Add from specific env file with prefix"),
+            (
+                "$ sm add -e .env.dev -p DEV_",
+                "Add from specific env file with prefix",
+            ),
             ("", ""),
             ("# Add single secret", ""),
             ('$ sm add DB_URL "mysql://localhost"', "Add single secret"),
@@ -31,24 +36,33 @@ class CustomGroup(click.Group):
             ("$ sm remove -e .env.dev", "Remove from specific env file"),
             ("$ sm remove -p DEV_", "Remove by prefix"),
             ("$ sm remove DB_URL", "Remove single secret"),
-            ("$ sm rm -f -p TEST_", "Force remove by prefix without confirmation"),
+            (
+                "$ sm rm -f -p TEST_",
+                "Force remove by prefix without confirmation",
+            ),
             ("", ""),
             ("# List secrets", ""),
             ("$ sm list", "List all secrets"),
             ("$ sm list -p DEV_", "List secrets with prefix"),
             ("$ sm ls -p TEST_", "List secrets with prefix (alias)"),
-            ("$ sm rm -f -p TEST_", "Force remove by prefix without confirmation"),
+            (
+                "$ sm rm -f -p TEST_",
+                "Force remove by prefix without confirmation",
+            ),
             ("", ""),
             ("# Get single secret", ""),
             ("$ sm get DB_URL", "Get value of specific secret"),
         ]
 
         # Show project info
-        project_id = env.get_project_id()
+        config = env.get_project_config()
         project_info = (
-            f"🗂️  Project: {project_id} (from env PROJECT_ID) \n"
-            if project_id
-            else "⚠️  Project ID not set (requires PROJECT_ID in env)\n"
+            f"🗂️  Project: {config.project_id} (from {config.source_path})\n"
+            if config.project_id
+            else (
+                "⚠️  Project ID not set (requires PROJECT_ID in env)\n"
+                f"   Required in: {config.source_path or '.env'}\n"
+            )
         )
         console.console.print(project_info)
 
@@ -57,15 +71,21 @@ class CustomGroup(click.Group):
         env_table.add_column("Setting", style="cyan", no_wrap=True, width=20)
         env_table.add_column("Description", style="white", width=50)
 
-        env_table.add_row("PROJECT_ID", "GCP Project ID for Secret Manager operations")
-        env_table.add_row("TZ", "Timezone for displaying timestamps (default: UTC)")
+        env_table.add_row(
+            "PROJECT_ID", "GCP Project ID for Secret Manager operations"
+        )
+        env_table.add_row(
+            "TZ", "Timezone for displaying timestamps (default: UTC)"
+        )
 
         console.console.print("[bold]Environment Settings:[/bold]")
         console.console.print(env_table)
 
         # Command description
         command_table = console.Table(show_header=False, box=None)
-        command_table.add_column("Command", style="cyan", no_wrap=True, width=20)
+        command_table.add_column(
+            "Command", style="cyan", no_wrap=True, width=20
+        )
         command_table.add_column("Description", style="white", width=50)
 
         command_table.add_row("add", "Add secrets from file or command line")
@@ -104,13 +124,13 @@ class CustomGroup(click.Group):
 @click.pass_context
 def cli(ctx: Context, project_id: Optional[str]):
     """Secret Manager CLI tool"""
+    config = env.get_project_config()
+    project_id = project_id or config.project_id
     if not project_id:
-        project_id = env.get_project_id()
-        if not project_id:
-            console.print_error(
-                "No project-id provided and PROJECT_ID not found in env!"
-            )
-            ctx.exit(1)
+        console.print_error(
+            "No project-id provided and PROJECT_ID not found in env!"
+        )
+        ctx.exit(1)
 
     client = SecretManagerClient(project_id)
     ctx.obj = SecretManager(client)
@@ -129,7 +149,10 @@ def cli(ctx: Context, project_id: Optional[str]):
     help="Use environment file (default: .env, or specify custom file path)",
 )
 @click.option(
-    "-p", "--prefix", default="", help="Environment variable prefix (e.g., dev, prod)"
+    "-p",
+    "--prefix",
+    default="",
+    help="Environment variable prefix (e.g., dev, prod)",
 )
 @click.argument("key", required=False)
 @click.argument("value", required=False)
@@ -230,11 +253,15 @@ def remove(
     # Check parameter validity
     if not any([env_file, prefix is not None, key]):
         console.print_error("Please specify one of the following methods:")
-        console.console.print("  -e          : Remove secrets from default .env file")
+        console.console.print(
+            "  -e          : Remove secrets from default .env file"
+        )
         console.console.print(
             "  -e FILE     : Remove secrets from specified environment file"
         )
-        console.console.print("  -p [PREFIX] : Remove secrets with specified prefix")
+        console.console.print(
+            "  -p [PREFIX] : Remove secrets with specified prefix"
+        )
         console.console.print("  -f          : Force remove, skip confirmation")
         console.console.print("  KEY         : Remove single secret")
         ctx.exit(1)
@@ -297,8 +324,12 @@ def remove(
                 # Show results
                 console.console.print("\n[bold]Deletion Results:[/bold]")
                 console.show_operation_table(results)
-                success_count = len([r for r in results if r["status"] == "✅ Deleted"])
-                error_count = len([r for r in results if "❌ Error" in r["status"]])
+                success_count = len(
+                    [r for r in results if r["status"] == "✅ Deleted"]
+                )
+                error_count = len(
+                    [r for r in results if "❌ Error" in r["status"]]
+                )
                 console.show_summary(
                     {
                         "✅ Successfully Deleted": success_count,
@@ -365,7 +396,9 @@ def remove(
                 )
         else:
             # Single secret removal mode
-            console.console.print(f"\n[bold]Removing Single Secret:[/bold] {key}")
+            console.console.print(
+                f"\n[bold]Removing Single Secret:[/bold] {key}"
+            )
 
             # Check if secret exists
             secret = manager.get_secret(key)
@@ -429,7 +462,8 @@ def get(key: str, project_id: Optional[str] = None):
     """Get the value of a specific secret"""
     try:
         # Get project_id
-        project_id = project_id or env.get_project_id()
+        config = env.get_project_config()
+        project_id = project_id or config.project_id
         if not project_id:
             console.print_error("PROJECT_ID is required")
             return
@@ -440,7 +474,9 @@ def get(key: str, project_id: Optional[str] = None):
 
         # Get secret value
         with console.create_spinner_progress() as progress:
-            task = progress.add_task("[blue]Getting secret value...", total=None)
+            task = progress.add_task(
+                "[blue]Getting secret value...", total=None
+            )
             result = manager.get_secret_value(key)
             progress.update(task, completed=True)
 

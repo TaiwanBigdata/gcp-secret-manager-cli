@@ -173,4 +173,11 @@ content = "This project is licensed under the ${project.license} License."
 [directory]
 title = "Project Structure"
 enable = true
-exclude_dirs = [".git", "venv", "__pycache__", ".venv", "env", "build", "dist"]
+exclude_dirs = [".git", "env", "__pycache__", "build", "dist"]
+exclude_files = [".env*"]
+show_files = true
+show_comments = true
+
+[env]
+enable = true
+env_file = ".env"
