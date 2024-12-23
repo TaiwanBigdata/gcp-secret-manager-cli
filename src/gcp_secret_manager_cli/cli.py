@@ -24,8 +24,8 @@ class CustomGroup(click.Group):
             ("$ sm add -e", "Add from default .env file"),
             ("$ sm add -e .env.dev", "Add from specific env file"),
             (
-                "$ sm add -e .env.dev -p DEV_",
-                "Add from specific env file with prefix",
+                "$ sm add -e .env.dev -p DEV",
+                "With prefix (APP_VER becomes DEV_APP_VER)",
             ),
             ("", ""),
             ("# Add single secret", ""),

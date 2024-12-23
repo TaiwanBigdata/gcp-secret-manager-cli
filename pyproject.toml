@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "gcp-secret-manager-cli"
-version = "0.0.2"
+version = "0.0.3"
 description = "A command-line tool for managing GCP Secret Manager"
 readme = "README.md"
 requires-python = ">=3.8"

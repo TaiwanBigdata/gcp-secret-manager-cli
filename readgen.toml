@@ -91,7 +91,7 @@ $ sm list -P PROJECT_ID                 # Specify PROJECT_ID
 # From environment file
 $ sm add -e                             # Add from default .env file
 $ sm add -e .env.dev                    # Add from specific env file
-$ sm add -e .env.dev -p DEV_            # Add with prefix
+$ sm add -e .env.dev -p DEV             # Add with prefix (Prefix the variables with DEV_. e.g.: APP_VER > DEV_APP_VER)
 
 # Single secret
 $ sm add DB_URL "mysql://localhost"     # Add single secret
@@ -173,11 +173,22 @@ content = "This project is licensed under the ${project.license} License."
 [directory]
 title = "Project Structure"
 enable = true
-exclude_dirs = [".git", "env", "__pycache__", "build", "dist"]
-exclude_files = [".env*"]
+exclude_patterns = [
+   ".cursorrules",
+   ".env*",
+   "**/.DS_Store",
+   ".git/",
+   ".gitignore",
+   "env/",
+   "**/__pycache__/",
+   "jupyterlab",
+   "secrets",
+   "build",
+   "dist",
+]
 show_files = true
 show_comments = true
 
 [env]
-enable = true
+enable = false
 env_file = ".env"
