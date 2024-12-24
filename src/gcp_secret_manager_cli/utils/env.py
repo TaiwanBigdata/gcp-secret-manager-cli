@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Dict, Optional
 from dotenv import load_dotenv
 import os
+from dotenv import dotenv_values
 
 
 def find_env_file(filename: str = ".env") -> Optional[Path]:
@@ -22,17 +23,8 @@ def read_env_file(file_path: str) -> Dict[str, str]:
     if not env_path:
         raise FileNotFoundError(f"Can't find the environment file: {file_path}")
 
-    env_content = {}
-    with open(env_path) as f:
-        for line in f:
-            line = line.strip()
-            if line and not line.startswith("#"):
-                try:
-                    key, value = line.split("=", 1)
-                    env_content[key.strip()] = value.strip()
-                except ValueError:
-                    continue
-    return env_content
+    # Use dotenv_values instead of manual parsing
+    return dict(dotenv_values(env_path))
 
 
 @dataclass

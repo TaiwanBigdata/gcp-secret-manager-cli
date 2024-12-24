@@ -1,6 +1,6 @@
 # GCP Secret Manager CLI 
 
-### gcp-secret-manager-cli (0.0.3)
+### gcp-secret-manager-cli (0.0.4)
 A command-line interface tool for managing secrets in Google Cloud Platform's Secret Manager service with support for bulk operations using environment files.
 
 
