@@ -61,8 +61,10 @@ class SecretManager:
             )
 
             for key, value in env_content.items():
-                secret_id = f"{prefix}{key}".lower()
-                progress.update(task, description=f"[blue]Processing: {secret_id}")
+                secret_id = f"{prefix}{key}"
+                progress.update(
+                    task, description=f"[blue]Processing: {secret_id}"
+                )
 
                 try:
                     # Try to create secret
@@ -72,7 +74,9 @@ class SecretManager:
                         status = "✅ Created"
                         stats["created"] += 1
                     except exceptions.AlreadyExists:
-                        secret_path = f"{self.client.project_path}/secrets/{secret_id}"
+                        secret_path = (
+                            f"{self.client.project_path}/secrets/{secret_id}"
+                        )
                         status = "🔄 Updated"
                         stats["updated"] += 1
 
@@ -82,7 +86,9 @@ class SecretManager:
 
                 except Exception as e:
                     stats["error"] += 1
-                    results.append({"name": secret_id, "status": f"❌ Error: {str(e)}"})
+                    results.append(
+                        {"name": secret_id, "status": f"❌ Error: {str(e)}"}
+                    )
 
                 progress.advance(task)
 
@@ -102,7 +108,6 @@ class SecretManager:
             Dict[str, str]: Operation result
         """
         try:
-            key = key.lower()
             # Try to create secret
             try:
                 secret = self.client.create_secret(key)
@@ -130,7 +135,6 @@ class SecretManager:
             Dict[str, str]: Operation result
         """
         try:
-            key = key.lower()
             secret_path = f"{self.client.project_path}/secrets/{key}"
             self.client.delete_secret(secret_path)
             return {"name": key, "status": "✅ Deleted"}
@@ -154,7 +158,9 @@ class SecretManager:
             task = progress.add_task("[blue]Fetching secrets...", total=None)
             secrets = list(self.client.list_secrets(prefix))
             count = len(secrets)
-            progress.update(task, completed=True, description="[green]Fetch complete")
+            progress.update(
+                task, completed=True, description="[green]Fetch complete"
+            )
 
         return secrets, count
 
@@ -173,7 +179,8 @@ class SecretManager:
             secrets = list(self.client.list_secrets())
             # Find the secret that exactly matches the name
             matching_secret = next(
-                (s for s in secrets if s.name.split("/")[-1] == secret_id.lower()), None
+                (s for s in secrets if s.name.split("/")[-1] == secret_id),
+                None,
             )
             return matching_secret
         except Exception:
@@ -190,8 +197,6 @@ class SecretManager:
             Optional[str]: Secret value, returns None if not found
         """
         try:
-            # Convert to lowercase for processing
-            secret_id = secret_id.lower()
             secret = self.get_secret(secret_id)
             if not secret:
                 return None
@@ -221,7 +226,9 @@ class SecretManager:
         with console.create_spinner_progress() as progress:
             task = progress.add_task("[blue]Fetching secrets...", total=None)
             secrets = list(self.client.list_secrets(prefix))
-            progress.update(task, completed=True, description="[green]Fetch complete")
+            progress.update(
+                task, completed=True, description="[green]Fetch complete"
+            )
 
         if not secrets:
             console.print_warning("No secrets found to delete.")
@@ -246,15 +253,21 @@ class SecretManager:
         stats = {"success": 0, "error": 0, "total": len(secrets)}
 
         with console.create_progress() as progress:
-            task = progress.add_task("[blue]Deleting secrets...", total=len(secrets))
+            task = progress.add_task(
+                "[blue]Deleting secrets...", total=len(secrets)
+            )
 
             for secret in secrets:
                 secret_name = secret.name.split("/")[-1]
-                progress.update(task, description=f"[blue]Deleting: {secret_name}")
+                progress.update(
+                    task, description=f"[blue]Deleting: {secret_name}"
+                )
 
                 try:
                     self.client.delete_secret(secret.name)
-                    results.append({"name": secret_name, "status": "✅ Deleted"})
+                    results.append(
+                        {"name": secret_name, "status": "✅ Deleted"}
+                    )
                     stats["success"] += 1
                 except Exception as e:
                     results.append(

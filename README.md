@@ -1,6 +1,6 @@
 # GCP Secret Manager CLI 
 
-### gcp-secret-manager-cli (0.0.5)
+### gcp-secret-manager-cli (0.0.6)
 A command-line interface tool for managing secrets in Google Cloud Platform's Secret Manager service with support for bulk operations using environment files.
 
 
@@ -106,6 +106,10 @@ $ sm remove -e .env.dev                 # Remove from specific env file
 $ sm remove -p DEV_                     # Remove by prefix
 $ sm remove DB_URL                      # Remove single secret
 $ sm rm -f -p TEST_                     # Force remove by prefix without confirmation
+
+# Remove all secrets
+$ sm rm --all                           # Remove all secrets (⚠️ DANGEROUS)
+$ sm rm --all -f                        # Force remove all secrets without confirmation
 ```
 
 #### Listing Secrets
@@ -133,6 +137,7 @@ $ sm get DB_URL                         # Get single secret value
 ### Remove Command
 - `-e, --env-file`: Remove from env file
 - `-p, --prefix`: Remove by prefix
+- `--all`: Remove all secrets (⚠️ DANGEROUS)
 - `-f, --force`: Skip confirmation
 - `KEY`: Remove single secret
 

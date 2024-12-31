@@ -239,6 +239,11 @@ def add(
     default=None,
     help="Remove secrets with specific prefix",
 )
+@click.option(
+    "--all",
+    is_flag=True,
+    help="Remove all secrets (⚠️ DANGEROUS: This will remove ALL secrets)",
+)
 @click.option("-f", "--force", is_flag=True, help="Skip confirmation prompt")
 @click.argument("key", required=False)
 def remove(
@@ -246,12 +251,13 @@ def remove(
     manager: SecretManager,
     env_file: Optional[str],
     prefix: Optional[str],
+    all: bool,
     force: bool,
     key: Optional[str],
 ):
     """Remove secrets by prefix or key"""
     # Check parameter validity
-    if not any([env_file, prefix is not None, key]):
+    if not any([env_file, prefix is not None, key, all]):
         console.print_error("Please specify one of the following methods:")
         console.console.print(
             "  -e          : Remove secrets from default .env file"
@@ -262,9 +268,48 @@ def remove(
         console.console.print(
             "  -p [PREFIX] : Remove secrets with specified prefix"
         )
+        console.console.print(
+            "  --all       : Remove all secrets (⚠️ DANGEROUS)"
+        )
         console.console.print("  -f          : Force remove, skip confirmation")
         console.console.print("  KEY         : Remove single secret")
         ctx.exit(1)
+
+    if all:
+        console.console.print(
+            "\n[bold red]⚠️  WARNING: You are about to remove ALL secrets![/bold red]"
+        )
+        console.console.print("[red]This action cannot be undone![/red]")
+
+        if not force:
+            # 要求輸入專案 ID 作為額外確認
+            project_confirm = click.prompt("Type the project ID to confirm")
+            if project_confirm != manager.client.project_id:
+                console.print_error(
+                    "Project ID does not match. Operation cancelled."
+                )
+                ctx.exit(1)
+
+            if not click.confirm("\nAre you ABSOLUTELY sure?"):
+                console.print_warning("Operation cancelled")
+                ctx.exit(0)
+
+        # 使用空的 prefix 來刪除所有 secrets
+        stats, results = manager.delete_secrets(prefix="", force=True)
+
+        # 顯示結果
+        if results:
+            console.console.print("\n[bold]Deletion Results:[/bold]")
+            console.show_operation_table(results)
+            console.show_summary(
+                {
+                    "✅ Successfully Deleted": stats.get("success", 0),
+                    "❌ Failed to Delete": stats.get("error", 0),
+                }
+            )
+
+        # 完成後直接退出
+        ctx.exit(0)
 
     try:
         if env_file:

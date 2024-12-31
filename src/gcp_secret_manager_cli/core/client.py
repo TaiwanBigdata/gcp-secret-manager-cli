@@ -21,7 +21,7 @@ class SecretManagerClient:
         Create a new secret
 
         Args:
-            secret_id (str): Secret identifier (will be converted to lowercase)
+            secret_id (str): Secret identifier
 
         Returns:
             Secret: Created Secret object
@@ -32,7 +32,7 @@ class SecretManagerClient:
         return self.client.create_secret(
             request={
                 "parent": self.project_path,
-                "secret_id": secret_id.lower(),
+                "secret_id": secret_id,
                 "secret": {"replication": {"automatic": {}}},
             }
         )
@@ -80,15 +80,18 @@ class SecretManagerClient:
         List all secrets
 
         Args:
-            prefix (str, optional): Secret name prefix (will be converted to lowercase)
+            prefix (str, optional): Secret name prefix
 
         Returns:
             Iterator: Secret objects iterator
         """
-        secrets = self.client.list_secrets(request={"parent": self.project_path})
+        secrets = self.client.list_secrets(
+            request={"parent": self.project_path}
+        )
         if prefix:
-            prefix = prefix.lower()
-            return filter(lambda x: x.name.split("/")[-1].startswith(prefix), secrets)
+            return filter(
+                lambda x: x.name.split("/")[-1].startswith(prefix), secrets
+            )
         return secrets
 
     def delete_secret(self, secret_path: str):
