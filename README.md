@@ -90,7 +90,7 @@ $ sm list -P PROJECT_ID                 # Specify PROJECT_ID
 # From environment file
 $ sm add -e                             # Add from default .env file
 $ sm add -e .env.dev                    # Add from specific env file
-$ sm add -e .env.dev -p DEV             # Add with prefix (Prefix the variables with DEV_. e.g.: APP_VER > DEV_APP_VER)
+$ sm add -e .env.dev -p DEV             # Add with prefix (underscore will be added automatically: DEV_APP_VER)
 
 # Single secret
 $ sm add DB_URL "mysql://localhost"     # Add single secret
@@ -103,9 +103,9 @@ $ sm remove -e                          # Remove from default .env file
 $ sm remove -e .env.dev                 # Remove from specific env file
 
 # By prefix or key
-$ sm remove -p DEV_                     # Remove by prefix
+$ sm remove -p DEV                      # Remove by prefix (underscore will be added automatically)
 $ sm remove DB_URL                      # Remove single secret
-$ sm rm -f -p TEST_                     # Force remove by prefix without confirmation
+$ sm rm -f -p TEST                      # Force remove by prefix without confirmation
 
 # Remove all secrets
 $ sm rm --all                           # Remove all secrets (⚠️ DANGEROUS)
@@ -115,8 +115,8 @@ $ sm rm --all -f                        # Force remove all secrets without confi
 #### Listing Secrets
 ```bash
 $ sm list                               # List all secrets
-$ sm list -p DEV_                       # List secrets with prefix
-$ sm ls -p TEST_                        # List secrets with prefix (alias)
+$ sm list -p DEV                        # List secrets with prefix (underscore will be added automatically)
+$ sm ls -p TEST                         # List secrets with prefix (alias)
 ```
 
 #### Retrieving Secret Value

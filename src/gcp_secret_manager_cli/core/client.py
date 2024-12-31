@@ -80,7 +80,7 @@ class SecretManagerClient:
         List all secrets
 
         Args:
-            prefix (str, optional): Secret name prefix
+            prefix (str, optional): Secret name prefix (underscore will be added if missing)
 
         Returns:
             Iterator: Secret objects iterator

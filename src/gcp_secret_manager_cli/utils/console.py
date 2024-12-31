@@ -68,7 +68,7 @@ def show_operation_table(
 ) -> None:
     """Display operation results table"""
     table = Table(title=title)
-    table.add_column("Secret Name", justify="right", style="cyan")
+    table.add_column("Secret Name", justify="left", style="cyan")
     table.add_column("Status", justify="left", style="green")
 
     for result in results:

@@ -25,7 +25,7 @@ class SecretManager:
 
         Args:
             env_file (str): Path to environment file
-            prefix (str, optional): Secret name prefix
+            prefix (str, optional): Secret name prefix (underscore will be added if missing)
 
         Returns:
             Tuple[Dict[str, int], List[Dict[str, str]]]:
@@ -47,7 +47,7 @@ class SecretManager:
             console.print_warning("No environment variables found in file.")
             return {"empty": 1}, []
 
-        # Handle prefix
+        # Add underscore to prefix if provided and not ending with underscore
         if prefix and not prefix.endswith("_"):
             prefix = f"{prefix}_"
 
@@ -148,12 +148,16 @@ class SecretManager:
         List secrets
 
         Args:
-            prefix (str, optional): Secret name prefix
+            prefix (str, optional): Secret name prefix (underscore will be added if missing)
 
         Returns:
             Tuple[List[Dict[str, str]], int]:
                 (Secrets list, Total count)
         """
+        # Add underscore to prefix if provided and not ending with underscore
+        if prefix and not prefix.endswith("_"):
+            prefix = f"{prefix}_"
+
         with console.create_spinner_progress() as progress:
             task = progress.add_task("[blue]Fetching secrets...", total=None)
             secrets = list(self.client.list_secrets(prefix))
@@ -215,13 +219,17 @@ class SecretManager:
         Delete secrets
 
         Args:
-            prefix (str, optional): Secret name prefix
+            prefix (str, optional): Secret name prefix (underscore will be added if missing)
             force (bool, optional): Skip confirmation prompt
 
         Returns:
             Tuple[Dict[str, int], List[Dict[str, str]]]:
                 (Operation stats, Operation results)
         """
+        # Add underscore to prefix if provided and not ending with underscore
+        if prefix and not prefix.endswith("_"):
+            prefix = f"{prefix}_"
+
         # Get secrets to delete
         with console.create_spinner_progress() as progress:
             task = progress.add_task("[blue]Fetching secrets...", total=None)
